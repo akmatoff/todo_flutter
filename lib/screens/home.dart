@@ -9,13 +9,11 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  List<Todo> todos = [
-    Todo(id: 1, title: 'finish this todo app', completed: false),
-    Todo(id: 2, title: 'remember flutter', completed: false),
-    Todo(id: 3, title: 'do some stuff', completed: false),
-  ];
+  final TextEditingController controller = TextEditingController();
+  List<Todo> todos = [];
   List<Todo> selectedTodos = [];
   bool addingTodo = false;
+  int todoID = 0;
 
   addTodoPress() {
     setState(() {
@@ -29,9 +27,41 @@ class _HomeState extends State<Home> {
     });
   }
 
+  addTodo() {
+    setState(() {
+      if (controller.text != '') {
+        Todo newTodo =
+            Todo(id: ++todoID, title: controller.text, completed: false);
+        todos.add(newTodo);
+        controller.text = '';
+      }
+    });
+  }
+
+  todoPress(Todo todo) {
+    setState(() {
+      todo.completed = !todo.completed;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: PreferredSize(
+        preferredSize: Size(double.infinity, 100),
+        child: SafeArea(
+          child: CustomAppBar(
+              color: addingTodo ? secondaryColor : backgroundColor,
+              child: addingTodo
+                  ? GestureDetector(
+                      onTap: cancel, child: Icon(Icons.cancel_outlined))
+                  : Text('Your Tasks',
+                      style: TextStyle(
+                          color: Colors.black87,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 18.0))),
+        ),
+      ),
       floatingActionButton: addingTodo
           ? SizedBox()
           : FloatingActionButton(
@@ -39,29 +69,21 @@ class _HomeState extends State<Home> {
               child: Icon(Icons.add),
               backgroundColor: primaryColor,
             ),
-      body: SafeArea(
-        child: Column(
-          children: [
-            CustomAppBar(
-                color: addingTodo ? secondaryColor : backgroundColor,
-                child: addingTodo
-                    ? GestureDetector(
-                        onTap: cancel, child: Icon(Icons.cancel_outlined))
-                    : Text('Your Tasks',
-                        style: TextStyle(
-                            color: Colors.black87,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 18.0))),
-            Padding(
+      body: ListView(
+        children: [
+          Padding(
               padding:
                   const EdgeInsets.symmetric(horizontal: 12.0, vertical: 5.0),
               child: Column(
-                  children: todos.map((todo) => TodoCard(todo: todo)).toList()),
-            )
-          ],
-        ),
+                  children: todos
+                      .map((todo) =>
+                          TodoCard(todo: todo, onTap: () => todoPress(todo)))
+                      .toList())),
+        ],
       ),
-      bottomSheet: addingTodo ? AddTodo() : SizedBox(),
+      bottomSheet: addingTodo
+          ? AddTodo(onTap: addTodo, controller: controller)
+          : SizedBox(),
     );
   }
 }
