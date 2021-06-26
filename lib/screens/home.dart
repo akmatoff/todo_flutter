@@ -17,11 +17,21 @@ class _HomeState extends State<Home> {
   bool addingTodo = false;
   int todoID = 0;
 
+  int newTodoID = 0;
+  List<Todo> newTodos = [];
+
+  getData() async {
+    newTodoID = await getTodoID();
+    newTodos = await getTodos();
+    print(newTodos);
+  }
+
   @override
   void initState() {
-    setState(() async {
-      todos = await getTodos();
-      todoID = await getTodoID();
+    getData();
+    setState(() {
+      todos = newTodos;
+      todoID = newTodoID;
     });
     super.initState();
   }
