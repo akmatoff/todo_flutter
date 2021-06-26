@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:todo_flutter/config/style.dart';
 import 'package:todo_flutter/models/todo-model.dart';
 import 'package:todo_flutter/widgets/widgets.dart';
+import 'package:todo_flutter/store.dart';
 
 class Home extends StatefulWidget {
   @override
@@ -15,6 +16,15 @@ class _HomeState extends State<Home> {
   bool selecting = false;
   bool addingTodo = false;
   int todoID = 0;
+
+  @override
+  void initState() {
+    setState(() async {
+      todos = await getTodos();
+      todoID = await getTodoID();
+    });
+    super.initState();
+  }
 
   addTodoPress() {
     setState(() {
@@ -37,6 +47,8 @@ class _HomeState extends State<Home> {
             Todo(id: ++todoID, title: controller.text, completed: false);
         todos.add(newTodo);
         controller.text = '';
+
+        saveData();
       }
     });
   }
@@ -66,6 +78,12 @@ class _HomeState extends State<Home> {
     setState(() {
       todos.removeWhere((todo) => selectedTodos.contains(todo));
     });
+    saveData();
+  }
+
+  saveData() {
+    saveTodoID(todoID);
+    saveTodos(todos);
   }
 
   Widget bottomSheet() {
