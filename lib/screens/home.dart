@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:todo_flutter/config/style.dart';
 import 'package:todo_flutter/models/todo-model.dart';
 import 'package:todo_flutter/widgets/widgets.dart';
-import 'package:todo_flutter/store.dart';
+
+import '../store.dart';
 
 class Home extends StatefulWidget {
   @override
@@ -17,23 +18,23 @@ class _HomeState extends State<Home> {
   bool addingTodo = false;
   int todoID = 0;
 
-  int newTodoID = 0;
-  List<Todo> newTodos = [];
-
-  getData() async {
-    newTodoID = await getTodoID();
-    newTodos = await getTodos();
-    print(newTodos);
-  }
-
   @override
   void initState() {
-    getData();
-    setState(() {
-      todos = newTodos;
-      todoID = newTodoID;
-    });
+    initSharedPrefs();
     super.initState();
+  }
+
+  initSharedPrefs() async {
+    await init(); // initialize shared preferences from 'store.dart
+    setState(() {
+      todos = getTodos();
+      todoID = getTodoID();
+    });
+  }
+
+  saveData() {
+    setTodos(todos);
+    setTodoID(todoID);
   }
 
   addTodoPress() {
@@ -57,10 +58,9 @@ class _HomeState extends State<Home> {
             Todo(id: ++todoID, title: controller.text, completed: false);
         todos.add(newTodo);
         controller.text = '';
-
-        saveData();
       }
     });
+    saveData();
   }
 
   todoPress(Todo todo) {
@@ -68,6 +68,7 @@ class _HomeState extends State<Home> {
       setState(() {
         todo.completed = !todo.completed;
       });
+      saveData();
     } else {
       setState(() {
         if (!selectedTodos.contains(todo))
@@ -80,7 +81,7 @@ class _HomeState extends State<Home> {
 
   todoLongPress(Todo todo) {
     setState(() {
-      selecting = true;
+      if (!addingTodo) selecting = true;
     });
   }
 
@@ -89,11 +90,6 @@ class _HomeState extends State<Home> {
       todos.removeWhere((todo) => selectedTodos.contains(todo));
     });
     saveData();
-  }
-
-  saveData() {
-    saveTodoID(todoID);
-    saveTodos(todos);
   }
 
   Widget bottomSheet() {

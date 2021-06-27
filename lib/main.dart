@@ -4,7 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:todo_flutter/screens/home.dart';
 import 'package:todo_flutter/config/style.dart';
 
-void main() {
+Future<void> main() async {
   runApp(App());
 }
 
