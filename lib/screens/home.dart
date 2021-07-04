@@ -81,6 +81,7 @@ class _HomeState extends State<Home> {
 
   todoLongPress(Todo todo) {
     setState(() {
+      selectedTodos.add(todo);
       if (!addingTodo) selecting = true;
     });
   }
@@ -103,46 +104,50 @@ class _HomeState extends State<Home> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        appBar: PreferredSize(
-          preferredSize: Size(double.infinity, 100),
-          child: SafeArea(
-            child: CustomAppBar(
-                color:
-                    addingTodo || selecting ? secondaryColor : backgroundColor,
-                child: addingTodo || selecting
-                    ? GestureDetector(
-                        onTap: cancel, child: Icon(Icons.cancel_outlined))
-                    : Text('Your Tasks',
-                        style: TextStyle(
-                            color: Colors.black87,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 18.0))),
+    return WillPopScope(
+      onWillPop: () async => cancel(),
+      child: Scaffold(
+          appBar: PreferredSize(
+            preferredSize: Size(double.infinity, 100),
+            child: SafeArea(
+              child: CustomAppBar(
+                  color: addingTodo || selecting
+                      ? secondaryColor
+                      : backgroundColor,
+                  child: addingTodo || selecting
+                      ? GestureDetector(
+                          onTap: cancel, child: Icon(Icons.cancel_outlined))
+                      : Text('Your Tasks',
+                          style: TextStyle(
+                              color: Colors.black87,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 18.0))),
+            ),
           ),
-        ),
-        floatingActionButton: addingTodo || selecting
-            ? SizedBox()
-            : FloatingActionButton(
-                onPressed: addTodoPress,
-                child: Icon(Icons.add),
-                backgroundColor: primaryColor,
-              ),
-        body: ListView(
-          children: [
-            Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12.0, vertical: 5.0),
-                child: Column(
-                    children: todos
-                        .map((todo) => TodoCard(
-                              todo: todo,
-                              selectedTodos: selectedTodos,
-                              onTap: () => todoPress(todo),
-                              onLongPress: () => todoLongPress(todo),
-                            ))
-                        .toList())),
-          ],
-        ),
-        bottomSheet: bottomSheet());
+          floatingActionButton: addingTodo || selecting
+              ? SizedBox()
+              : FloatingActionButton(
+                  onPressed: addTodoPress,
+                  child: Icon(Icons.add),
+                  backgroundColor: primaryColor,
+                ),
+          body: ListView(
+            children: [
+              Padding(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 12.0, vertical: 5.0),
+                  child: Column(
+                      children: todos
+                          .map((todo) => TodoCard(
+                                todo: todo,
+                                selectedTodos: selectedTodos,
+                                onTap: () => todoPress(todo),
+                                onLongPress: () => todoLongPress(todo),
+                              ))
+                          .toList())),
+            ],
+          ),
+          bottomSheet: bottomSheet()),
+    );
   }
 }
